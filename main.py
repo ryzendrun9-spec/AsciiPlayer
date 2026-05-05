@@ -27,23 +27,19 @@ color_map = {
     "white": curses.COLOR_WHITE
 }
 
-# --- безопасная загрузка конфига
 def load_config():
     try:
         if not os.path.exists(CONFIG_FILE):
             raise Exception()
-
         with open(CONFIG_FILE, "r") as f:
             data = f.read().strip()
             if not data:
                 raise Exception()
             return json.loads(data)
-
     except:
         with open(CONFIG_FILE, "w") as f:
             json.dump(default_config, f, indent=4)
         return default_config
-
 
 def get_player_info():
     try:
@@ -56,22 +52,17 @@ def get_player_info():
     except:
         return "Stopped", "No Track", "", 0, 1
 
-
-# --- формат времени 00:00
 def format_time(seconds):
     seconds = int(seconds)
     m = seconds // 60
     s = seconds % 60
     return f"{m:02d}:{s:02d}"
 
-
 def init_colors():
     curses.start_color()
     curses.use_default_colors()
-
     for i in range(0, 8):
         curses.init_pair(i + 1, i, -1)
-
 
 def draw(stdscr):
     config = load_config()
@@ -87,7 +78,6 @@ def draw(stdscr):
     while True:
         now = time.time()
 
-        # --- реже обновляем playerctl
         if now - last_update > 0.5:
             player_data = get_player_info()
             last_update = now
@@ -98,11 +88,9 @@ def draw(stdscr):
         height, width = stdscr.getmaxyx()
         bar_width = width - 4
 
-        # --- заголовок
         text = f"♪ {title} - {artist}"
         stdscr.addstr(1, max(0, (width - len(text)) // 2), text[:width-1])
 
-        # --- визуализатор
         for i in range(bar_width):
             if status == "Playing":
                 char = random.choice("▁▂▃▄▅▆▇█")
@@ -112,9 +100,7 @@ def draw(stdscr):
             if config.get("rgb", False):
                 hue = (i / max(bar_width, 1) + hue_offset) % 1.0
                 r, g, b = colorsys.hsv_to_rgb(hue, 1, 1)
-
                 color_id = int(hue * 254) + 1
-
                 try:
                     curses.init_color(
                         color_id,
@@ -126,11 +112,9 @@ def draw(stdscr):
                     color = curses.color_pair(color_id)
                 except:
                     color = curses.color_pair(1)
-
             elif config.get("single_color", False):
                 c = color_map.get(config.get("player_color", "cyan"), curses.COLOR_CYAN)
                 color = curses.color_pair(c + 1)
-
             else:
                 color = curses.color_pair(1)
 
@@ -139,7 +123,6 @@ def draw(stdscr):
             except:
                 pass
 
-        # --- прогресс бар
         ratio = pos / length if length > 0 else 0
         filled = int(bar_width * ratio)
         bar = "█" * filled + "─" * (bar_width - filled)
@@ -149,7 +132,6 @@ def draw(stdscr):
         except:
             pass
 
-        # --- время 00:00
         time_str = f"{status} ▶ {format_time(pos)} / {format_time(length)}"
         try:
             stdscr.addstr(7, max(0, (width - len(time_str)) // 2), time_str[:width-1])
@@ -163,7 +145,6 @@ def draw(stdscr):
 
         if stdscr.getch() == ord('q'):
             break
-
 
 if __name__ == "__main__":
     curses.wrapper(draw)
