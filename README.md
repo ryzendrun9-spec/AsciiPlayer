@@ -42,7 +42,20 @@ sudo pacman -S playerctl
 
 ---
 
-### 3. (Optional) Recommended terminal
+### 3. Terminal library (curses)
+
+The project uses the built-in Python module `curses`.
+
+* On Arch Linux it is already included with Python
+* If something is missing:
+
+```bash
+sudo pacman -S ncurses
+```
+
+---
+
+### 4. (Optional) Recommended terminal
 
 ```bash
 sudo pacman -S kitty
@@ -59,7 +72,7 @@ kitty --background-opacity 0.7
 ## Python dependencies
 
 No extra pip libraries required
-(uses only built-in modules)
+(uses only built-in modules: `curses`, `json`, `subprocess`, etc.)
 
 ---
 
